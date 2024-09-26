@@ -1,0 +1,38 @@
+name: Flutter CI/CD for Web
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Web App
+        run: flutter build web --release
+
+      - name: Deploy to Web Server
+        if: github.ref == 'refs/heads/main'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.BIT_LAUNCH_FIRST }}
+        run: |
+          echo "${{ secrets.BIT_LAUNCH_FIRST }}" > key.pem
+          chmod 600 key.pem
+          rsync -avz -e "ssh -i key.pem -o StrictHostKeyChecking=no" ./build/web/ root@64.7.198.230:/www/wwwroot/www.lalala.gay/web/
+          rm -f key.pem
