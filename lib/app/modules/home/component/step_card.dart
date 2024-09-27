@@ -21,7 +21,7 @@ class StepCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: Colors.white,
-          border: Border.all(color: Colors.black, width: 1.5),
+          border: Border.all(color: Colors.grey, width: 1),
         ),
         child: Center(
           child: Column(

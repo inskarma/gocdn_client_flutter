@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -27,10 +28,37 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  @override
-  void dispose() {
-    super.dispose();
+  bool _showLanguageSelector = true; // Переменная для контроля отображения
+
+  String _selectedLanguage = 'English';
+  final List<String> languages = ['English', 'Русский', '中文'];
+
+  void _closeLanguageSelector(String selectedLanguage) {
+    EasyLoading.show(status: 'Loading...', maskType: EasyLoadingMaskType.black);
+
+    setState(() {
+      _selectedLanguage = selectedLanguage;
+      _showLanguageSelector = false;
+
+      var locale = Locale(
+          selectedLanguage == 'English'
+              ? 'en'
+              : selectedLanguage == 'Русский'
+              ? 'ru'
+              : 'zh',
+          selectedLanguage == 'English'
+              ? 'US'
+              : selectedLanguage == 'Русский'
+              ? 'RU'
+              : 'CN');
+      Get.updateLocale(locale);
+    });
+
+    Future.delayed(Duration(seconds: 1), () {
+      EasyLoading.dismiss();
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -38,27 +66,155 @@ class _HomeViewState extends State<HomeView> {
       mobile: Scaffold(
         body: Stack(
           children: [
-            _buildMainContent(Colors.transparent),
+            _buildMainContent(Colors.grey[100]!),
             _buildHeader(),
             ScrollProgressBar(height: 1),
+            if (_showLanguageSelector) _buildLanguageSelector(),
+            // Вставляем выбор языка через Stack
           ],
         ),
       ),
       tablet: Scaffold(
         body: Stack(
           children: [
-            _buildMainContent(Colors.transparent),
+            _buildMainContent(Colors.grey[100]!),
             _buildHeader(),
             ScrollProgressBar(height: 1),
+            if (_showLanguageSelector) _buildLanguageSelector(),
           ],
         ),
       ),
       desktop: Scaffold(
         body: Stack(
           children: [
-            _buildMainContent(Colors.transparent),
+            _buildMainContent(Colors.grey[100]!),
             _buildHeader(),
             ScrollProgressBar(height: 1),
+            if (_showLanguageSelector) _buildLanguageSelector(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Виджет для выбора языка
+  Widget _buildLanguageSelector() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        width: 300,
+
+        color: Colors.black.withOpacity(0.5),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Container(
+
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                    Text(
+                      "language_selection".tr,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  SizedBox(
+                    width: 32,
+                  ),
+                  InkWell(
+                    child: Icon(Icons.close, color: Colors.white),
+                    onTap: () {
+                      setState(() {
+                        _showLanguageSelector = false; // Закрыть выбор языка
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              width: 600,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton2(
+                        hint: Text(
+                          "language_select".tr,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        items: languages
+                            .map((String language) => DropdownMenuItem<String>(
+                                  value: language,
+                                  child: Text(
+                                    language,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                        value: _selectedLanguage,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedLanguage = newValue!;
+                          });
+                        },
+                        buttonStyleData: ButtonStyleData(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey[900],
+                          ),
+                        ),
+                        dropdownStyleData: DropdownStyleData(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        iconStyleData: const IconStyleData(
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    flex: 1,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _closeLanguageSelector(
+                            _selectedLanguage); // Закрываем выбор языка после выбора
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                      ),
+                      child: Text(
+                        "language_change_button".tr,
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -206,7 +362,7 @@ class _HomeViewState extends State<HomeView> {
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                         color: Colors.red,
-                                        width: 2.0,
+                                        width: 1.0,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -228,216 +384,208 @@ class _HomeViewState extends State<HomeView> {
                     children: [
                       Expanded(
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(width: 8),
-                              Text(
-                                "get_cdn".tr,
-                                style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(width: 8),
+                            Text(
+                              "get_cdn".tr,
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Baseline(
+                                  baseline: 16,
+                                  baselineType: TextBaseline.alphabetic,
+                                  child: Container(
+                                    width: 3,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(32),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Baseline(
-                                    baseline: 16,
-                                    baselineType: TextBaseline.alphabetic,
-                                    child: Container(
-                                      width: 3,
-                                      height: 12,
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(32),
-                                      ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text("boost_speed".tr),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Baseline(
+                                  baseline: 16,
+                                  baselineType: TextBaseline.alphabetic,
+                                  child: Container(
+                                    width: 3,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(32),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text("boost_speed".tr),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Baseline(
-                                    baseline: 16,
-                                    baselineType: TextBaseline.alphabetic,
-                                    child: Container(
-                                      width: 3,
-                                      height: 12,
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(32),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text("extra_performance".tr),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            VideoPlayerScreen(),
+                            const SizedBox(height: 32),
+                            Responsive.isDesktop(context) ||
+                                    Responsive.isTablet(context)
+                                ? Row(
+                                    children: [
+                                      HoverEffectButton(
+                                        onPressed: () {},
+                                        expanded: 1.1,
+                                        milsec: 150,
+                                        shrink: 0.8,
+                                        child: InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          onTap: () async {
+                                            const String url =
+                                                'https://user.gocdn.vip';
+                                            if (await canLaunchUrl(
+                                                Uri.parse(url))) {
+                                              await launchUrl(Uri.parse(url));
+                                            } else {
+                                              throw 'Не удалось открыть $url';
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text('get_cdn_button'.tr,
+                                                style: const TextStyle(
+                                                    color: Colors.white)),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text("extra_performance".tr),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 32),
-                              VideoPlayerScreen(),
-                              const SizedBox(height: 32),
-                              Responsive.isDesktop(context) ||
-                                      Responsive.isTablet(context)
-                                  ? Row(
-                                      children: [
-                                        HoverEffectButton(
-                                          onPressed: () {},
-                                          expanded: 1.1,
-                                          milsec: 150,
-                                          shrink: 0.8,
-                                          child: InkWell(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            onTap: () async {
-                                              const String url =
-                                                  'https://user.gocdn.vip';
-                                              if (await canLaunchUrl(
-                                                  Uri.parse(url))) {
-                                                await launchUrl(Uri.parse(url));
-                                              } else {
-                                                throw 'Не удалось открыть $url';
-                                              }
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 8),
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Text('get_cdn_button'.tr,
-                                                  style: const TextStyle(
-                                                      color: Colors.white)),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 32),
-                                        HoverEffectButton(
-                                          onPressed: () {},
-                                          expanded: 1.1,
-                                          milsec: 150,
-                                          shrink: 0.8,
-                                          child: InkWell(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            onTap: () {
+                                      const SizedBox(width: 32),
+                                      HoverEffectButton(
+                                        onPressed: () {},
+                                        expanded: 1.1,
+                                        milsec: 150,
+                                        shrink: 0.8,
+                                        child: InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          onTap: () {
+                                            Get.find<KeyController>()
+                                                .scrollToSection(
                                               Get.find<KeyController>()
-                                                  .scrollToSection(
-                                                Get.find<KeyController>()
-                                                    .section1Key,
-                                                1,
-                                              );
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 8),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: Colors.red,
-                                                  width: 2.0,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                  'view_packages_button'.tr),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        HoverEffectButton(
-                                          onPressed: () {},
-                                          expanded: 1.1,
-                                          milsec: 150,
-                                          shrink: 0.8,
-                                          child: InkWell(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            onTap: () async {
-                                              const String url =
-                                                  'https://user.gocdn.vip';
-                                              if (await canLaunchUrl(
-                                                  Uri.parse(url))) {
-                                                await launchUrl(Uri.parse(url));
-                                              } else {
-                                                throw 'Не удалось открыть $url';
-                                              }
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 8),
-                                              decoration: BoxDecoration(
+                                                  .section1Key,
+                                              1,
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
                                                 color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                                width: 1.0,
                                               ),
-                                              child: Text('get_cdn_button'.tr,
-                                                  style: const TextStyle(
-                                                      color: Colors.white)),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
+                                            child:
+                                                Text('view_packages_button'.tr),
                                           ),
                                         ),
-                                        const SizedBox(height: 16),
-                                        HoverEffectButton(
-                                          onPressed: () {},
-                                          expanded: 1.1,
-                                          milsec: 150,
-                                          shrink: 0.8,
-                                          child: InkWell(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            onTap: () {
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      HoverEffectButton(
+                                        onPressed: () {},
+                                        expanded: 1.1,
+                                        milsec: 150,
+                                        shrink: 0.8,
+                                        child: InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          onTap: () async {
+                                            const String url =
+                                                'https://user.gocdn.vip';
+                                            if (await canLaunchUrl(
+                                                Uri.parse(url))) {
+                                              await launchUrl(Uri.parse(url));
+                                            } else {
+                                              throw 'Не удалось открыть $url';
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text('get_cdn_button'.tr,
+                                                style: const TextStyle(
+                                                    color: Colors.white)),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16,width: 16,),
+                                      HoverEffectButton(
+                                        onPressed: () {},
+                                        expanded: 1.1,
+                                        milsec: 150,
+                                        shrink: 0.8,
+                                        child: InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          onTap: () {
+                                            Get.find<KeyController>()
+                                                .scrollToSection(
                                               Get.find<KeyController>()
-                                                  .scrollToSection(
-                                                Get.find<KeyController>()
-                                                    .section1Key,
-                                                1,
-                                              );
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 8),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: Colors.red,
-                                                  width: 2.0,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                                  .section1Key,
+                                              1,
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.red,
+                                                width: 1.0,
                                               ),
-                                              child: Text(
-                                                  'view_packages_button'.tr),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
+                                            child:
+                                                Text('view_packages_button'.tr),
                                           ),
                                         ),
-                                      ],
-                                    )
-                            ]),
+                                      ),
+                                    ],
+                                  )
+                          ],
+                        ),
                       ),
                       SizedBox(width: 32),
                     ],
@@ -480,7 +628,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                     Container(
-                      child: Image.asset(
+                      child: Image.network(
                         "assets/partners_white.png",
                         height: 300,
                         width: 300,
@@ -527,7 +675,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildBenefitsSection(Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 32,horizontal: 4),
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 4),
       color: color,
       width: double.infinity,
       child: Center(
@@ -782,21 +930,25 @@ class _HomeViewState extends State<HomeView> {
                             step: "step1_title".tr,
                             description: "step1_description".tr,
                           ),
-                          SizedBox(width: 32,),
+                          SizedBox(
+                            width: 32,
+                          ),
                           StepCard(
                             sufWidget: '2',
                             step: "step2_title".tr,
                             description: "step2_description".tr,
                           ),
-                          SizedBox(width: 32,),
-
+                          SizedBox(
+                            width: 32,
+                          ),
                           StepCard(
                             sufWidget: '3',
                             step: "step3_title".tr,
                             description: "step3_description".tr,
                           ),
-                          SizedBox(width: 32,),
-
+                          SizedBox(
+                            width: 32,
+                          ),
                           StepCard(
                             sufWidget: '4',
                             step: "step4_title".tr,
@@ -896,7 +1048,7 @@ class _HomeViewState extends State<HomeView> {
                     ],
                   )
                 : IntrinsicHeight(
-                  child: Column(
+                    child: Column(
                       children: [
                         Expanded(
                           child: Center(
@@ -932,7 +1084,7 @@ class _HomeViewState extends State<HomeView> {
                         const SizedBox(width: 32),
                       ],
                     ),
-                ),
+                  ),
           ),
         ),
       ),
@@ -951,8 +1103,8 @@ class _HomeViewState extends State<HomeView> {
           color: Colors.white.withOpacity(0.6),
           border: Border(
             bottom: BorderSide(
-              color: Colors.black,
-              width: 2.0,
+              color: Colors.grey,
+              width: 1.0,
             ),
           ),
         ),
@@ -976,110 +1128,113 @@ class _HomeViewState extends State<HomeView> {
                 child: Center(
                   child: Stack(
                     children: [
-                      Row(
-                        children: [
-                          Responsive.isDesktop(context) ||
-                                  Responsive.isTablet(context)
-                              ? SizedBox(
-                                  width: 16,
-                                )
-                              : SizedBox(),
-                          HoverEffectButton(
-                            onPressed: () async {
-                              Get.toNamed(Routes.HOME);
-                            },
-                            expanded: 1.1,
-                            milsec: 150,
-                            shrink: 0.8,
-                            child: Container(
-                                margin: const EdgeInsets.only(
-                                    left: 4, top: 3, bottom: 3),
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.red,
-                                      width: 2.0,
-                                    ),
-                                    color: Colors.black.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(8)),
-                                width: 120,
-                                height: 60,
-                                child: Image.asset('assets/logo_gocdn-2.png')),
-                          ),
-                          const Spacer(),
-                          HoverEffectButton(
-                            onPressed: () {},
-                            expanded: 1.1,
-                            milsec: 150,
-                            shrink: 0.8,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(8),
-                              onTap: () async {
-                                const String url = 'https://user.gocdn.vip';
-                                if (await canLaunchUrl(Uri.parse(url))) {
-                                  await launchUrl(Uri.parse(url));
-                                } else {
-                                  throw 'Не удалось открыть $url';
-                                }
+                      Container(
+                        width: 1400,
+                        child: Row(
+                          children: [
+                            Responsive.isDesktop(context) ||
+                                    Responsive.isTablet(context)
+                                ? SizedBox(
+                                    width: 16,
+                                  )
+                                : SizedBox(),
+                            HoverEffectButton(
+                              onPressed: () async {
+                                Get.toNamed(Routes.HOME);
                               },
+                              expanded: 1.1,
+                              milsec: 150,
+                              shrink: 0.8,
                               child: Container(
-                                margin: const EdgeInsets.only(
-                                    right: 4),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text('get_cdn_button'.tr,
-                                    style: TextStyle(color: Colors.white)),
-                              ),
+                                  margin: const EdgeInsets.only(
+                                      left: 4, top: 3, bottom: 3),
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.red,
+                                        width: 1.0,
+                                      ),
+                                      color: Colors.black.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(8)),
+                                  width: 120,
+                                  height: 60,
+                                  child:
+                                      Image.asset('assets/logo_gocdn-2.png')),
                             ),
-                          ),
-                          Responsive.isDesktop(context) ||
-                                  Responsive.isTablet(context)
-                              ? SizedBox(
-                                  width: 16,
-                                )
-                              : SizedBox(),
-                          HoverEffectButton(
-                            onPressed: () {},
-                            expanded: 1.1,
-                            milsec: 150,
-                            shrink: 0.8,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(8),
-                              onTap: () async {
-                                const String url = 'https://user.gocdn.vip';
-                                if (await canLaunchUrl(Uri.parse(url))) {
-                                  await launchUrl(Uri.parse(url));
-                                } else {
-                                  throw 'Не удалось открыть $url';
-                                }
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                    right: 4, top: 3, bottom: 3),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  EvaIcons.person,
-                                  size: 24,
-                                  color: Colors.black,
+                            const Spacer(),
+                            HoverEffectButton(
+                              onPressed: () {},
+                              expanded: 1.1,
+                              milsec: 150,
+                              shrink: 0.8,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () async {
+                                  const String url = 'https://user.gocdn.vip';
+                                  if (await canLaunchUrl(Uri.parse(url))) {
+                                    await launchUrl(Uri.parse(url));
+                                  } else {
+                                    throw 'Не удалось открыть $url';
+                                  }
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 4),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text('get_cdn_button'.tr,
+                                      style: TextStyle(color: Colors.white)),
                                 ),
                               ),
                             ),
-                          ),
-                          Responsive.isDesktop(context) ||
-                                  Responsive.isTablet(context)
-                              ? SizedBox(
-                                  width: 16,
-                                )
-                              : SizedBox(),
-                        ],
+                            Responsive.isDesktop(context) ||
+                                    Responsive.isTablet(context)
+                                ? SizedBox(
+                                    width: 16,
+                                  )
+                                : SizedBox(),
+                            HoverEffectButton(
+                              onPressed: () {},
+                              expanded: 1.1,
+                              milsec: 150,
+                              shrink: 0.8,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () async {
+                                  const String url = 'https://user.gocdn.vip';
+                                  if (await canLaunchUrl(Uri.parse(url))) {
+                                    await launchUrl(Uri.parse(url));
+                                  } else {
+                                    throw 'Не удалось открыть $url';
+                                  }
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(
+                                      right: 4, top: 3, bottom: 3),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    EvaIcons.person,
+                                    size: 24,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Responsive.isDesktop(context) ||
+                                    Responsive.isTablet(context)
+                                ? SizedBox(
+                                    width: 16,
+                                  )
+                                : SizedBox(),
+                          ],
+                        ),
                       ),
                     ],
                   ),

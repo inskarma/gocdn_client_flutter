@@ -22,7 +22,7 @@ class BenefitCard extends StatelessWidget {
 
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.black, width: 2.0),
+          border: Border.all(color: Colors.grey, width: 1.0),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -33,9 +33,11 @@ class BenefitCard extends StatelessWidget {
               child: Icon(icon, color: Colors.red),
             ),
             const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+              ),
             ),
             const SizedBox(height: 8),
             Expanded(child: Text(description)),

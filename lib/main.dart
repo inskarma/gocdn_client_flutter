@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       translations: MyTranslations(translations),
-      // locale: Get.deviceLocale ?? Locale('zh', 'CN'), // Локаль по умолчанию
-      locale: Locale('en', 'US'), // Локаль по умолчанию
+      locale: Get.deviceLocale ?? Locale('zh', 'CN'), // Локаль по умолчанию
+      // locale: Locale('en', 'US'), // Локаль по умолчанию
       // locale: Locale('zh', 'CN'), // Локаль по умолчанию
       fallbackLocale: Locale('zh', 'CN'),
       getPages: AppPages.routes, // Определяем маршруты
